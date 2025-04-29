@@ -5,10 +5,17 @@ from math import sin, cos, asin, atan, pi as PI
 class Matrix:
     M: list[list[float]]
 
-    def __init__(self, M: list[list[tuple]]):
-        M = M.copy()
-        return None
-
+    def __str__(self):
+        return self.M.__str__()
+    
+    def __add__(self, other: 'Matrix'):
+        A = self.M
+        B = other.M
+        li: list[list[float]] = [[col + B[r][c]
+                                  for c, col in enumerate(row)]
+                                  for r, row in enumerate(A)]
+        return Matrix(li)
+    
     def __mul__(self, other: 'Matrix'):
         A = self.M
         B = Matrix.transpose(other).M
@@ -17,14 +24,6 @@ class Matrix:
                     for c, i in enumerate(row)])
                     for col in B]
                     for row in A]
-        return Matrix(li)
-    
-    def __add__(self, other: 'Matrix'):
-        A = self.M
-        B = other.M
-        li: list[list[float]] = [[col + B[r][c]
-                                  for c, col in enumerate(row)]
-                                  for r, row in enumerate(A)]
         return Matrix(li)
 
     @staticmethod
