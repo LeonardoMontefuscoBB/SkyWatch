@@ -93,18 +93,18 @@ class Matrix:
 
 @dataclass
 class Color:
-    BRANCO: tuple[int, int, int]    = (255, 255, 255)
-    CINZA: tuple[int, int, int]     = (178, 178, 178)
-    PRETO: tuple[int, int, int]     = (0, 0, 0)
-    VERMELHO: tuple[int, int, int]  = (255, 0, 0)
-    LARANJA: tuple[int, int, int]   = (247, 157, 83)
-    AMARELO: tuple[int, int, int]   = (255, 255, 0)
-    VERDE: tuple[int, int, int]     = (0, 176, 80)
-    TURQUESA: tuple[int, int, int]  = (93, 179, 203)
-    AZUL: tuple[int, int, int]      = (105, 216, 255)
-    ROXO: tuple[int, int, int]      = (158, 94, 206)
-    ROSA: tuple[int, int, int]      = (255, 102, 255)
-    MARROM: tuple[int, int, int]    = (188, 180, 138)
+    WHITE: tuple[int, int, int]    = (255, 255, 255)
+    GRAY: tuple[int, int, int]     = (178, 178, 178)
+    BLACK: tuple[int, int, int]     = (0, 0, 0)
+    RED: tuple[int, int, int]  = (255, 0, 0)
+    ORANGE: tuple[int, int, int]   = (247, 157, 83)
+    YELLOW: tuple[int, int, int]   = (255, 255, 0)
+    GREEN: tuple[int, int, int]     = (0, 176, 80)
+    TURQUOISE: tuple[int, int, int]  = (93, 179, 203)
+    BLUE: tuple[int, int, int]      = (105, 216, 255)
+    PURPLE: tuple[int, int, int]      = (158, 94, 206)
+    PINK: tuple[int, int, int]      = (255, 102, 255)
+    BROWN: tuple[int, int, int]    = (188, 180, 138)
     
     @staticmethod
     def rgb_to_tuple(rgb: int):
