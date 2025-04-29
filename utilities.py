@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from PIL import Image, ImageDraw
 from measurements import Color
+
 @dataclass
 class Table:
     def __init__(self, filepath: str):
@@ -35,12 +36,12 @@ class Table:
 class Canva:
     @staticmethod
     def create(x: int = 1572, y: int = 1572):
-        return Image.new("RGB", (x, y), Color.BLACK)
+        return Image.new("RGB", (x, y), Color.hex_to_tuple(Color.BLACK))
     
     @staticmethod
     def drawCircle(img: Image.Image, x: int, y: int, size: int, rgb: str):
-        ImageDraw.Draw(img).ellipse((y - size, 1571 - x - size, y + size, 1571 - x + size)
-                                    , fill=Color.hex_to_tuple(rgb))
+        ImageDraw.Draw(img).ellipse((y - size, x - size, y + size, x + size),
+                                    fill = Color.hex_to_tuple(rgb))
         return None
     
     @staticmethod
@@ -49,5 +50,4 @@ class Canva:
                                  fill = Color.hex_to_tuple(rgb),
                                  width = size)
         return None
-    
     
