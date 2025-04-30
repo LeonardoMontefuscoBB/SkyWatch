@@ -22,11 +22,11 @@ class Star:
         
         self.designation:   str   = designation
         self.magnitude:     float = float(magnitude)
-        self.rgb_des:       str   = Star.designationColor(self.designation)
+        self.rgb_des:       str   = Star.designationColor(designation)
         self.size:          float = Star.starSize(self.magnitude)
         return None
     
-    @classmethod
+    @staticmethod
     def designationColor(designation: str):
         match designation[-1]:
             case 'A':
@@ -51,7 +51,7 @@ class Star:
             return Color.GRAY
         return Color.WHITE
     
-    @classmethod
+    @staticmethod
     def starSize(magnitude: float):
         if   magnitude < 0.8: return 10.0
         elif magnitude < 0.0: return  8.0
@@ -62,8 +62,10 @@ class Star:
         elif magnitude < 6.0: return  1.0
         return 0.5
     
-    def rotate(self, R: Matrix = Matrix([1, 0, 0], [0, 1, 0], [0, 0, 1])):
+    def rotate(self, R: Matrix = Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])):
         v = Matrix.Vector(self.x, self.y, self.z)
+        # print(R.M)
+        # print(v.M)
         self.x_var, self.y_var, self.z_var = Matrix.UnpackVector(R * v)
         return None
     
@@ -126,12 +128,19 @@ class Firmament:
         self.populateVectors(vectors)
         return None
     
+    @staticmethod
+    def create():
+        cur_folder = os.path.dirname(__file__)
+        return Firmament(Table(f"{cur_folder}/data/stellar-catalogue.csv"),
+                         Table(f"{cur_folder}/data/vectoral-catalogue.csv"),
+                         Table(f"{cur_folder}/data/aggregational-catalogue.csv"))
+        
     def populateConstellations(self, dataset: Table):
         for c in dataset: self.set[int(c[0])] = Constellation(*c)
         return None
     
     def populateStars(self, dataset: Table):
-        for s in dataset: self.set[int(s[0])].populateStarSet(Star(*s))
+        for s in dataset: self.set[int(s[1])].populateStarSet(Star(*s))
         return None
     
     def populateVectors(self, dataset: Table):
@@ -195,6 +204,7 @@ class Firmament:
         img.save(f"{os.path.dirname(__file__)}/{filename}")
     
     def showPages(self, reference: int, filename: str):
+        from PIL import Image
         if reference < 0: return None
         R = [[[1,0,0],[0,0,1],[0,-1,0]],
              [[0.5,0.866025403784,0],[0,0,1],[0.866025403784,-0.5,0]],
@@ -212,11 +222,11 @@ class Firmament:
              [[0.57735026919,-0.57735026919,-0.57735026919],[0.707106781187,0,0.707106781187],[-0.408248290464,-0.816496580928,0.408248290464]],
              [[0,0,1],[-1,0,0],[0,-1,0]],
              [[0,0,-1],[1,0,0],[0,-1,0]]][reference]
-        img = Canvas.create()
+        img = Image.new("RGB", (1572, 1572), Color.hex_to_tuple(Color.WHITE))
         for c in self.set.values():
             for s in c.starset.values():
-                rgb = s.rgb
-                s.rotate(R)
+                rgb = Color.BLACK
+                s.rotate(Matrix(R))
                 if s.position():
                     x, y = s.position()
                     size = s.size

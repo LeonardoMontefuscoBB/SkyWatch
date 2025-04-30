@@ -1,6 +1,6 @@
 import os, random, sys, unittest
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from measurements import Matrix, Color
+from measurements import Color, Matrix
 
 class MeasurementTests(unittest.TestCase):
     def testsIfVectorMethodsAreWorking(self):
