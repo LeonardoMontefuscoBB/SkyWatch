@@ -11,6 +11,9 @@ class Table:
                                     for line in ifile]
         return None
     
+    def __iter__(self):
+        return iter(self.li)
+    
     def size(self):
         x: int = len(self.li)
         y: int = len(self.li[0])
