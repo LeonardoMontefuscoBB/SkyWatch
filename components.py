@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from math import pi as PI
+import os
 from measurements import Color, Matrix
 from utilities import Canvas, Table
 
@@ -140,3 +141,85 @@ class Firmament:
             self.set[int(v[0])].populateVectorSet(origin, target)
         return None
     
+    def show(self, option: int = 0, reference: int = -1, filename: str = "out.png"):
+        match option:
+            case 0: self.showRealistic(reference, filename)
+            case 1: self.showConstellation(reference, filename)
+            case 2: self.showDesignation(reference, filename)
+            case 3: self.showPages(reference, filename)
+        return None
+    
+    def showRealistic(self, reference: int, filename: str):
+        if reference < 0: return None
+        R = self.set[reference].R
+        img = Canvas.create()
+        for c in self.set.values():
+            for s in c.starset.values():
+                rgb = s.rgb
+                s.rotate(R)
+                if s.position():
+                    x, y = s.position()
+                    size = s.size
+                    Canvas.drawCircle(img, x, y, size, str, rgb)
+        img.save(f"{os.path.dirname(__file__)}/{filename}")
+        return None
+    
+    def showConstellation(self, reference: int, filename: str):
+        if reference < 0: return None
+        R = self.set[reference].R
+        img = Canvas.create()
+        for c in self.set.values():
+            rgb = c.rgb
+            for s in c.starset.values():
+                s.rotate(R)
+                if s.position():
+                    x, y = s.position()
+                    size = s.size
+                    Canvas.drawCircle(img, x, y, size, str, rgb)
+        img.save(f"{os.path.dirname(__file__)}/{filename}")
+        return None
+    
+    def showDesignation(self, reference: int, filename: str):
+        if reference < 0: return None
+        R = self.set[reference].R
+        img = Canvas.create()
+        for c in self.set.values():
+            for s in c.starset.values():
+                if c.cindex == reference: rgb = s.rgb_des
+                else: rgb = Color.WHITE
+                s.rotate(R)
+                if s.position():
+                    x, y = s.position()
+                    size = s.size
+                    Canvas.drawCircle(img, x, y, size, str, rgb)
+        img.save(f"{os.path.dirname(__file__)}/{filename}")
+    
+    def showPages(self, reference: int, filename: str):
+        if reference < 0: return None
+        R = [[[1,0,0],[0,0,1],[0,-1,0]],
+             [[0.5,0.866025403784,0],[0,0,1],[0.866025403784,-0.5,0]],
+             [[-0.5,0.866025403784,0],[0,0,1],[0.866025403784,0.5,0]],
+             [[-1,0,0],[0,0,1],[0,1,0]],
+             [[-0.5,-0.866025403784,0],[0,0,1],[-0.866025403784,0.5,0]],
+             [[0.5,-0.866025403784,0],[0,0,1],[-0.866025403784,-0.5,0]],
+             [[0.57735026919,0.57735026919,0.57735026919],[-0.707106781187,0,0.707106781187],[0.408248290464,-0.816496580928,0.408248290464]],
+             [[-0.57735026919,0.57735026919,0.57735026919],[0.707106781187,0,0.707106781187],[0.408248290464,0.816496580928,-0.408248290464]],
+             [[-0.57735026919,-0.57735026919,0.57735026919],[0.707106781187,0,0.707106781187],[-0.408248290464,0.816496580928,0.408248290464]],
+             [[0.57735026919,-0.57735026919,0.57735026919],[-0.707106781187,0,0.707106781187],[-0.408248290464,-0.816496580928,-0.408248290464]],
+             [[0.57735026919,0.57735026919,-0.57735026919],[0.707106781187,0,0.707106781187],[0.408248290464,-0.816496580928,-0.408248290464]],
+             [[-0.57735026919,0.57735026919,-0.57735026919],[-0.707106781187,0,0.707106781187],[0.408248290464,0.816496580928,0.408248290464]],
+             [[-0.57735026919,-0.57735026919,-0.57735026919],[-0.707106781187,0,0.707106781187],[-0.408248290464,0.816496580928,-0.408248290464]],
+             [[0.57735026919,-0.57735026919,-0.57735026919],[0.707106781187,0,0.707106781187],[-0.408248290464,-0.816496580928,0.408248290464]],
+             [[0,0,1],[-1,0,0],[0,-1,0]],
+             [[0,0,-1],[1,0,0],[0,-1,0]]][reference]
+        img = Canvas.create()
+        for c in self.set.values():
+            for s in c.starset.values():
+                rgb = s.rgb
+                s.rotate(R)
+                if s.position():
+                    x, y = s.position()
+                    size = s.size
+                    Canvas.drawCircle(img, x, y, size, str, rgb)
+        img.save(f"{os.path.dirname(__file__)}/{filename}")
+        return None
