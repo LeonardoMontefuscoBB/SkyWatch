@@ -33,7 +33,7 @@ class Table:
         return self.li
 
 @dataclass
-class Canva:
+class Canvas:
     @staticmethod
     def create(x: int = 1572, y: int = 1572):
         return Image.new("RGB", (x, y), Color.hex_to_tuple(Color.BLACK))
