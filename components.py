@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from measurements import Matrix, Color
 from math import pi as PI
+from measurements import Color, Matrix
+from utilities import Canvas, Table
 
 @dataclass
 class Star:
@@ -106,9 +107,36 @@ class Constellation:
         self.starset[s.designation] = s
         return None
     
-    def populateVectorSet(self, origin: str, target: str):
-        self.vectorset.append(Vector(self.starset[origin],
-                                     self.starset[target],
+    def populateVectorSet(self, origin: Star, target: Star):
+        self.vectorset.append(Vector(origin,
+                                     target,
                                      self.rgb))
+        return None
+    
+    def get(self, designation: str):
+        return self.starset[designation]
+
+@dataclass
+class Firmament:
+    def __init__(self, stars: Table, vectors: Table, constellations: Table):
+        self.set: dict[int, Constellation] = {}
+        self.populateConstellations(constellations)
+        self.populateStars(stars)
+        self.populateVectors(vectors)
+        return None
+    
+    def populateConstellations(self, dataset: Table):
+        for c in dataset: self.set[int(c[0])] = Constellation(*c)
+        return None
+    
+    def populateStars(self, dataset: Table):
+        for s in dataset: self.set[int(s[0])].populateStarSet(Star(*s))
+        return None
+    
+    def populateVectors(self, dataset: Table):
+        for v in dataset:
+            origin = self.set[int(v[1])].get(v[2])
+            target = self.set[int(v[3])].get(v[4])
+            self.set[int(v[0])].populateVectorSet(origin, target)
         return None
     
