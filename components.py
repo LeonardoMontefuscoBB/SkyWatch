@@ -230,6 +230,6 @@ class Firmament:
                 if s.position():
                     x, y = s.position()
                     size = s.size
-                    Canvas.drawCircle(img, x, y, size, str, rgb)
-        img.save(f"{os.path.dirname(__file__)}/{filename}")
+                    Canvas.drawCircle(img, x, y, size, rgb)
+        img.save(f"{os.path.dirname(__file__)}/images/{filename}")
         return None
