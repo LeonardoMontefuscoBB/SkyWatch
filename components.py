@@ -145,8 +145,10 @@ class Firmament:
     
     def populateVectors(self, dataset: Table):
         for v in dataset:
-            origin = self.set[int(v[1])].get(v[2])
-            target = self.set[int(v[3])].get(v[4])
+            try:
+                origin = self.set[int(v[1])].get(v[2])
+                target = self.set[int(v[3])].get(v[4])
+            except KeyError: print(v) #patch
             self.set[int(v[0])].populateVectorSet(origin, target)
         return None
     
@@ -169,7 +171,7 @@ class Firmament:
                 if s.position():
                     x, y = s.position()
                     size = s.size
-                    Canvas.drawCircle(img, x, y, size, str, rgb)
+                    Canvas.drawCircle(img, x, y, size, rgb)
         img.save(f"{os.path.dirname(__file__)}/{filename}")
         return None
     
@@ -184,7 +186,7 @@ class Firmament:
                 if s.position():
                     x, y = s.position()
                     size = s.size
-                    Canvas.drawCircle(img, x, y, size, str, rgb)
+                    Canvas.drawCircle(img, x, y, size, rgb)
         img.save(f"{os.path.dirname(__file__)}/{filename}")
         return None
     
@@ -200,7 +202,7 @@ class Firmament:
                 if s.position():
                     x, y = s.position()
                     size = s.size
-                    Canvas.drawCircle(img, x, y, size, str, rgb)
+                    Canvas.drawCircle(img, x, y, size, rgb)
         img.save(f"{os.path.dirname(__file__)}/{filename}")
     
     def showPages(self, reference: int, filename: str):
