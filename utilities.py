@@ -49,7 +49,7 @@ class Canvas:
     
     @staticmethod
     def drawLine(img: Image.Image, x0: int, y0: int, x1: int, y1: int, size: int, rgb: str):
-        ImageDraw.Draw(img).line((x0, y0, x1, y1),
+        ImageDraw.Draw(img).line((y0, x0, y1, x1),
                                  fill = Color.hex_to_tuple(rgb),
                                  width = size)
         return None

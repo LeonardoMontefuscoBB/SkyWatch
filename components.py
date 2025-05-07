@@ -86,6 +86,27 @@ class Vector:
         self.rgb: str = rgb
         return None
     
+    def position(self, R: Matrix = Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])):
+        # multA = [[sum([i * col[c]
+        #             for c, i in enumerate(row)])
+        #             for col in Matrix.transpose(self.A).M]
+        #             for row in R.M]
+        # multB = [[sum([i * col[c]
+        #             for c, i in enumerate(row)])
+        #             for col in Matrix.transpose(self.B).M]
+        #             for row in R.M]
+        thetaA, phiA = Matrix.UnpackVector(Matrix.toPolar(R * self.A))[1:]
+        thetaB, phiB = Matrix.UnpackVector(Matrix.toPolar(R * self.B))[1:]
+        posXA = 1571 - round(((thetaA + PI / 4) % (2 * PI)) * 1000)
+        posYA = round((((phiA + 3 * PI / 4) % PI) - PI / 2) * 1000)
+        posXB = 1571 - round(((thetaB + PI / 4) % (2 * PI)) * 1000)
+        posYB = round((((phiB + 3 * PI / 4) % PI) - PI / 2) * 1000)
+        if not 0 <= posXA < 1572: return None
+        if not 0 <= posYA < 1572: return None
+        if not 0 <= posXB < 1572: return None
+        if not 0 <= posYB < 1572: return None
+        return posXA, posYA, posXB, posYB
+
 @dataclass
 class Constellation:
     def __init__(self, cindex: str, name: str, abbreviation: str,
@@ -97,7 +118,7 @@ class Constellation:
         self.name: str = name
         self.abbreviation: str = abbreviation
         self.rgb: str = rgb
-        self.starset: dict[str, Star] = {}
+        self.starset: dict[int, Star] = {}
         self.vectorset: list[Vector] = []
         self.R: Matrix = Matrix([[float(R11), float(R12), float(R13)],
                                  [float(R21), float(R22), float(R23)],
@@ -107,7 +128,7 @@ class Constellation:
         return self.starset.__len__()
     
     def populateStarSet(self, s: Star):
-        self.starset[s.designation] = s
+        self.starset[s.index] = s
         return None
     
     def populateVectorSet(self, origin: Star, target: Star):
@@ -116,8 +137,8 @@ class Constellation:
                                      self.rgb))
         return None
     
-    def get(self, designation: str):
-        return self.starset[designation]
+    def get(self, index: int):
+        return self.starset[index]
 
 @dataclass
 class Firmament:
@@ -146,8 +167,8 @@ class Firmament:
     def populateVectors(self, dataset: Table):
         for v in dataset:
             try:
-                origin = self.set[int(v[1])].get(v[2])
-                target = self.set[int(v[3])].get(v[4])
+                origin = self.set[int(v[1])].get(int(v[2]))
+                target = self.set[int(v[3])].get(int(v[4]))
             except KeyError: print(v) #patch
             self.set[int(v[0])].populateVectorSet(origin, target)
         return None
@@ -158,8 +179,69 @@ class Firmament:
             case 1: self.showConstellation(reference, filename)
             case 2: self.showDesignation(reference, filename)
             case 3: self.showPages(reference, filename)
+            case 4: self.showPlain(reference, filename)
         return None
     
+    def showPlain(self, reference: int, filename: str):
+        if reference < 0: return None
+        R = [[[1,0,0],[0,0,1],[0,-1,0]],
+             [[0.5,0.866025403784,0],[0,0,1],[0.866025403784,-0.5,0]],
+             [[-0.5,0.866025403784,0],[0,0,1],[0.866025403784,0.5,0]],
+             [[-1,0,0],[0,0,1],[0,1,0]],
+             [[-0.5,-0.866025403784,0],[0,0,1],[-0.866025403784,0.5,0]],
+             [[0.5,-0.866025403784,0],[0,0,1],[-0.866025403784,-0.5,0]],
+             [[0.57735026919,0.57735026919,0.57735026919],[-0.707106781187,0,0.707106781187],[0.408248290464,-0.816496580928,0.408248290464]],
+             [[-0.57735026919,0.57735026919,0.57735026919],[0.707106781187,0,0.707106781187],[0.408248290464,0.816496580928,-0.408248290464]],
+             [[-0.57735026919,-0.57735026919,0.57735026919],[0.707106781187,0,0.707106781187],[-0.408248290464,0.816496580928,0.408248290464]],
+             [[0.57735026919,-0.57735026919,0.57735026919],[-0.707106781187,0,0.707106781187],[-0.408248290464,-0.816496580928,-0.408248290464]],
+             [[0.57735026919,0.57735026919,-0.57735026919],[0.707106781187,0,0.707106781187],[0.408248290464,-0.816496580928,-0.408248290464]],
+             [[-0.57735026919,0.57735026919,-0.57735026919],[-0.707106781187,0,0.707106781187],[0.408248290464,0.816496580928,0.408248290464]],
+             [[-0.57735026919,-0.57735026919,-0.57735026919],[-0.707106781187,0,0.707106781187],[-0.408248290464,0.816496580928,-0.408248290464]],
+             [[0.57735026919,-0.57735026919,-0.57735026919],[0.707106781187,0,0.707106781187],[-0.408248290464,-0.816496580928,0.408248290464]],
+             [[0,0,1],[-1,0,0],[0,-1,0]],
+             [[0,0,-1],[1,0,0],[0,-1,0]]][reference]
+        img = Canvas.create()
+        for c in self.set.values():
+            for v in c.vectorset:
+                rgb = v.rgb
+                if v.position(Matrix(R)):
+                    xA, yA, xB, yB = v.position(Matrix(R))
+                    size = 3
+                    Canvas.drawLine(img, xA, yA, xB, yB, size, rgb)
+            for s in c.starset.values():
+                rgb = s.rgb
+                s.rotate(Matrix(R))
+                if s.position():
+                    x, y = s.position()
+                    size = s.size
+                    Canvas.drawCircle(img, x, y, size, rgb)
+        img.save(f"{os.path.dirname(__file__)}/images/{filename}")
+        # for c in self.set.values():
+        #     # for v in c.vectorset:
+        #     #     rgb = v.rgb
+        #     #     if v.position(Matrix(R)):
+        #     #         xA, yA, xB, yB = v.position(R)
+        #     #         size = 3
+        #     #         Canvas.drawLine(img, xA, yA, xB, yB, size, rgb)
+        #     for s in c.starset.values():
+        #         rgb = s.rgb
+        #         s.rotate(R)
+        #         if s.position():
+        #             x, y = s.position()
+        #             size = s.size
+        #             Canvas.drawCircle(img, x, y, size, rgb)
+
+        # for c in self.set.values():
+        #     for s in c.starset.values():
+        #         rgb = Color.WHITE
+        #         s.rotate(R)
+        #         if s.position():
+        #             x, y = s.position()
+        #             size = s.size
+        #             Canvas.drawCircle(img, x, y, size, rgb)
+        # img.save(f"{os.path.dirname(__file__)}/{filename}")
+        return None
+
     def showRealistic(self, reference: int, filename: str):
         if reference < 0: return None
         R = self.set[reference].R
@@ -176,34 +258,35 @@ class Firmament:
         return None
     
     def showConstellation(self, reference: int, filename: str):
-        if reference < 0: return None
-        R = self.set[reference].R
-        img = Canvas.create()
-        for c in self.set.values():
-            rgb = c.rgb
-            for s in c.starset.values():
-                s.rotate(R)
-                if s.position():
-                    x, y = s.position()
-                    size = s.size
-                    Canvas.drawCircle(img, x, y, size, rgb)
-        img.save(f"{os.path.dirname(__file__)}/{filename}")
+        # if reference < 0: return None
+        # R = self.set[reference].R
+        # img = Canvas.create()
+        # for c in self.set.values():
+        #     rgb = c.rgb
+        #     for s in c.starset.values():
+        #         s.rotate(R)
+        #         if s.position():
+        #             x, y = s.position()
+        #             size = s.size
+        #             Canvas.drawCircle(img, x, y, size, rgb)
+        # img.save(f"{os.path.dirname(__file__)}/{filename}")
         return None
     
     def showDesignation(self, reference: int, filename: str):
-        if reference < 0: return None
-        R = self.set[reference].R
-        img = Canvas.create()
-        for c in self.set.values():
-            for s in c.starset.values():
-                if c.cindex == reference: rgb = s.rgb_des
-                else: rgb = Color.WHITE
-                s.rotate(R)
-                if s.position():
-                    x, y = s.position()
-                    size = s.size
-                    Canvas.drawCircle(img, x, y, size, rgb)
-        img.save(f"{os.path.dirname(__file__)}/{filename}")
+        # if reference < 0: return None
+        # R = self.set[reference].R
+        # img = Canvas.create()
+        # for c in self.set.values():
+        #     for s in c.starset.values():
+        #         if c.cindex == reference: rgb = s.rgb_des
+        #         else: rgb = Color.WHITE
+        #         s.rotate(R)
+        #         if s.position():
+        #             x, y = s.position()
+        #             size = s.size
+        #             Canvas.drawCircle(img, x, y, size, rgb)
+        # img.save(f"{os.path.dirname(__file__)}/{filename}")
+        return None
     
     def showPages(self, reference: int, filename: str):
         from PIL import Image
