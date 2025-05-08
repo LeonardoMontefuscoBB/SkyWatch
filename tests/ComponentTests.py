@@ -5,15 +5,16 @@ from components import Star, Vector, Constellation, Firmament
 
 
 class ComponentTests(unittest.TestCase):
-    def testsIfPagesAreBeingCreated(self):
+    def testsIfPrintablePagesAreBeingCreated(self):
         f = Firmament.create()
-        f.show(3, 1, f"1.png")
+        for page in range(16):
+            f.show(3, page, f"Page {'0' if page < 9 else ''}{page + 1}.png")
         return None
     
     def testsIfVectorsAreBeingCreated(self):
         f = Firmament.create()
         for direction in range(16):
-            f.show(4, direction, f"Image {direction + 1}.png")
+            f.show(4, direction, f"Image {'0' if direction < 9 else ''}{direction + 1}.png")
         return None
 
 if __name__ == "__main__": unittest.main()
