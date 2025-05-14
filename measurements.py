@@ -8,6 +8,12 @@ class Matrix:
     def __str__(self):
         return self.M.__str__()
     
+    def __iter__(self):
+        li = []
+        for row in self.M:
+            for value in row: li.append(value)
+        return iter(li)
+    
     def __add__(self, other: 'Matrix'):
         A = self.M
         B = other.M
@@ -15,6 +21,13 @@ class Matrix:
                                   for c, col in enumerate(row)]
                                   for r, row in enumerate(A)]
         return Matrix(li)
+    
+    def __sub__(self, other: 'Matrix'):
+        A = self.M
+        B = other.M
+        li: list[list[float]] = [[col - B[r][c]
+                                  for c, col in enumerate(row)]
+                                  for r, row in enumerate(A)]
     
     def __mul__(self, other: 'Matrix'):
         A = self.M
@@ -25,6 +38,16 @@ class Matrix:
                     for col in B]
                     for row in A]
         return Matrix(li)
+    
+    def __eq__(self, other: 'Matrix'):
+        A = self.M
+        B = other.M
+        n_digits = 6
+        for row, li in enumerate(A):
+            for col, value in enumerate(li):
+                if not round(value, n_digits) == round(B[row][col], n_digits):
+                    return False
+        return len(A) == len(B) and len(A[0]) == len(B[0])
 
     @staticmethod
     def transpose(m: 'Matrix'):
@@ -35,6 +58,41 @@ class Matrix:
                                   for col in range(n_row)]
                                   for row in range(n_col)]
         return Matrix(li)
+    
+    @staticmethod
+    def invert(m: 'Matrix'):
+        A = m.M.copy()
+        n = len(A)
+        I = Matrix.Identity(n).M
+
+        def NULLCHECK(A, I, n, col):
+            for nullcheck in range(col, n):
+                if round(A[nullcheck][col], 6) == 0: continue
+                if not col == nullcheck:
+                    A[col], A[nullcheck] = A[nullcheck], A[col]
+                    I[col], I[nullcheck] = I[nullcheck], I[col]
+                break
+        def TRIANGULATE(A, I, n, col):
+            for row in range(col + 1, n):
+                if round(A[row][col], 6) == 0: continue
+                ratio = A[row][col] / A[col][col]
+                A[row] = [i - A[col][c] * ratio for c, i in enumerate(A[row])]
+                I[row] = [i - I[col][c] * ratio for c, i in enumerate(I[row])]
+        def ROTATE(M):
+            n = len(M)
+            return [[M[n - row - 1][n - col - 1] for col in range(n)] for row in range(n)]
+        def SCALE(A, I, n):
+            for row in range(n): I[row] = [i / A[row][row] for i in I[row]]
+        
+        for col in range(n): NULLCHECK(A, I, n, col); TRIANGULATE(A, I, n, col)
+        A = ROTATE(A)
+        I = ROTATE(I)
+        for col in range(n): TRIANGULATE(A, I, n, col)
+        A = ROTATE(A)
+        I = ROTATE(I)
+        SCALE(A, I, n)
+        
+        return Matrix(I)
     
     @staticmethod
     def toPolar(m: 'Matrix'):
@@ -59,6 +117,10 @@ class Matrix:
     @staticmethod
     def UnpackVector(m: 'Matrix'):
         return tuple((row[0] for row in m.M))
+    
+    @staticmethod
+    def Identity(dimension: int):
+        return Matrix([[1.0 if col == row else 0.0 for col in range(dimension)] for row in range(dimension)])
     
     @staticmethod
     def normalize(m: 'Matrix'):
